@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://sircalen.github.io/bulkdownloaderforvimeo/sitemap.xml

@@ -3,26 +3,33 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Bulk Downloader for Vimeo – Original Quality</title>
-<meta name="description" content="The only Chrome extension that bulk-downloads your Vimeo library at original upload quality. Drop a CSV. Get every master file. No transcoded copies.">
+<title>Bulk Downloader for Vimeo – Original Quality Chrome Extension</title>
+<meta name="description" content="The only Chrome extension that bulk-downloads your entire Vimeo library at original upload quality. Drop a CSV from Vimeo support, get every master file. No transcoded copies, no API limits, no accounts.">
 <meta name="theme-color" content="#0a0a0a">
+<meta name="author" content="Calen">
+<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">
+<meta name="keywords" content="bulk download vimeo, vimeo bulk download, download all vimeo videos, vimeo original quality, vimeo download extension, vimeo csv download, download vimeo masters, vimeo backup tool, vimeo bulk downloader chrome extension, download entire vimeo library, vimeo original file download">
 
-<!-- Search keywords baked into the body, but also a hint here -->
-<meta name="keywords" content="bulk download vimeo, vimeo bulk download, download all vimeo videos, vimeo original quality, vimeo download extension, vimeo csv download, download vimeo masters, vimeo backup tool">
+<link rel="canonical" href="https://sircalen.github.io/bulkdownloaderforvimeo/">
+<link rel="preconnect" href="https://chromewebstore.google.com">
+<link rel="dns-prefetch" href="https://chromewebstore.google.com">
 
 <!-- Open Graph / social -->
 <meta property="og:type" content="website">
+<meta property="og:site_name" content="Bulk Downloader for Vimeo">
+<meta property="og:locale" content="en_US">
 <meta property="og:url" content="https://sircalen.github.io/bulkdownloaderforvimeo/">
-<meta property="og:title" content="Bulk Downloader for Vimeo – Original Quality">
+<meta property="og:title" content="Bulk Downloader for Vimeo – Original Quality Chrome Extension">
 <meta property="og:description" content="Drop in a CSV file. Get every master file. The only Chrome extension that bulk-downloads your Vimeo library at original upload quality.">
 <meta property="og:image" content="https://sircalen.github.io/bulkdownloaderforvimeo/og-image.jpg">
 <meta property="og:image:width" content="1257">
 <meta property="og:image:height" content="800">
 <meta property="og:image:alt" content="Bulk Downloader for Vimeo – Original Quality">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Bulk Downloader for Vimeo – Original Quality">
+<meta name="twitter:title" content="Bulk Downloader for Vimeo – Original Quality Chrome Extension">
 <meta name="twitter:description" content="Drop in a CSV file. Get every master file. The only Chrome extension that bulk-downloads your Vimeo library at original upload quality.">
 <meta name="twitter:image" content="https://sircalen.github.io/bulkdownloaderforvimeo/og-image.jpg">
+<meta name="twitter:image:alt" content="Bulk Downloader for Vimeo – Original Quality">
 
 <!-- Structured data for SEO -->
 <script type="application/ld+json">
@@ -30,10 +37,136 @@
   "@context": "https://schema.org",
   "@type": "SoftwareApplication",
   "name": "Bulk Downloader for Vimeo",
-  "operatingSystem": "Chrome",
+  "alternateName": "Vimeo Bulk Downloader",
+  "operatingSystem": "Chrome OS, Windows, macOS, Linux",
   "applicationCategory": "BrowserApplication",
-  "description": "The only Chrome extension that bulk-downloads your Vimeo library at original upload quality. Drop a CSV. Get every master file. No transcoded copies.",
-  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+  "applicationSubCategory": "Chrome Extension",
+  "description": "The only Chrome extension that bulk-downloads your Vimeo library at original upload quality. Drop a CSV from Vimeo support, get every master file. No transcoded copies, no API limits, no accounts.",
+  "url": "https://sircalen.github.io/bulkdownloaderforvimeo/",
+  "image": "https://sircalen.github.io/bulkdownloaderforvimeo/og-image.jpg",
+  "downloadUrl": "https://chromewebstore.google.com/detail/hnhehedakjafihioabaijicbidhabnme",
+  "installUrl": "https://chromewebstore.google.com/detail/hnhehedakjafihioabaijicbidhabnme",
+  "browserRequirements": "Requires Google Chrome",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+  "author": { "@type": "Person", "name": "Calen" }
+}
+</script>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "How do I download all my Vimeo videos at once?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Email Vimeo support to request a bulk-download CSV of your library. They'll send back signed download links to every original file you've uploaded, usually within 1 to 3 business days. Drop that CSV into the Bulk Downloader for Vimeo Chrome extension and your entire library downloads automatically at original upload quality."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Do I need a paid Vimeo plan?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes. Vimeo support only issues bulk-download CSVs to paid accounts (Standard tier and above). Free accounts won't have the CSV option available to them."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How long does the Vimeo bulk-download CSV take to arrive?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Typically 1 to 3 business days from Vimeo support. Once it lands in your inbox, the signed links inside last about 7 days before they expire, so plan to download soon after you receive it."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What if the links in the CSV have already expired?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "The extension detects expired links the moment you drop the CSV in and walks you through requesting a fresh one. It will never try to download an expired URL – that path is closed before you can hit Start."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How is this different from yt-dlp, LOVE, or the Vimeo API?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Tools like yt-dlp can fetch a single original from Vimeo, but only when you're logged in and the uploader has explicitly enabled Allow Download on that specific video. There's no public endpoint anywhere that returns originals in bulk. Batch tools like LOVE work in volume but are limited to Vimeo's transcoded streaming copies. The support-issued bulk-download CSV is the only path that gives you signed links to every original at once, and this extension is the only tool built around that path."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Is this affiliated with Vimeo?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "No. This is a third-party tool that uses the official CSV that Vimeo support provides. No API keys, no scraping, no workarounds."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What about privacy?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Nothing leaves your machine. The extension parses the CSV in your browser and hands each download to Chrome's downloads engine. No analytics, no tracking, no servers. The only outbound requests are the file downloads themselves, going from Chrome directly to Vimeo's CDN."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Does it work on Mac, Windows, and Linux?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Anywhere Chrome runs. The extension is platform-agnostic – files save to your default Chrome downloads folder, wherever that is on your OS."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Can it download someone else's Vimeo videos?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "No. The CSV only contains signed links to videos you own. This is a tool for getting your own files back, not for accessing other people's content."
+      }
+    }
+  ]
+}
+</script>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "HowTo",
+  "name": "How to bulk download your Vimeo library at original quality",
+  "description": "Three-step process to download every video in your Vimeo library at original upload quality using the Bulk Downloader for Vimeo Chrome extension.",
+  "totalTime": "PT3D",
+  "tool": [
+    { "@type": "HowToTool", "name": "Bulk Downloader for Vimeo Chrome extension" },
+    { "@type": "HowToTool", "name": "Vimeo bulk-download CSV (issued by Vimeo support)" }
+  ],
+  "step": [
+    {
+      "@type": "HowToStep",
+      "position": 1,
+      "name": "Request the bulk-download CSV from Vimeo support",
+      "text": "Email Vimeo support and ask for a bulk-download CSV of your library. They'll reply, usually within 1 to 3 business days, with signed download links to every original file you've uploaded.",
+      "url": "https://sircalen.github.io/bulkdownloaderforvimeo/#how"
+    },
+    {
+      "@type": "HowToStep",
+      "position": 2,
+      "name": "Drop the CSV into the Chrome extension",
+      "text": "Open the Bulk Downloader for Vimeo extension, drop in the CSV, and your entire library is parsed instantly. Sort by size, resolution, or title; expired links are flagged before you start.",
+      "url": "https://sircalen.github.io/bulkdownloaderforvimeo/#how"
+    },
+    {
+      "@type": "HowToStep",
+      "position": 3,
+      "name": "Click Start and walk away",
+      "text": "Multiple files come down in parallel with live per-file speed and ETA. Close the popup whenever you want; downloads keep running in the background and a desktop notification fires when the batch is complete.",
+      "url": "https://sircalen.github.io/bulkdownloaderforvimeo/#how"
+    }
+  ]
 }
 </script>
 
@@ -635,7 +768,7 @@
       </div>
     </div>
     <div class="hero-shot reveal" aria-hidden="true">
-      <img src="screenshots/02-preview_fullsize.jpg" alt="Preview screen of the Bulk Downloader for Vimeo extension">
+      <img src="screenshots/02-preview_fullsize.jpg" alt="Bulk Downloader for Vimeo Chrome extension preview screen showing a Vimeo library ready to bulk download at original quality" fetchpriority="high" decoding="async" width="952" height="1200">
     </div>
   </div>
 </section>
@@ -659,7 +792,7 @@
           </p>
         </div>
         <div class="step-shot reveal">
-          <img src="screenshots/05-stale.jpg" alt="">
+          <img src="screenshots/05-stale.jpg" alt="Expired Vimeo CSV detection screen, warning before any download is attempted" loading="lazy" decoding="async" width="480" height="600">
         </div>
       </div>
 
@@ -675,7 +808,7 @@
           </p>
         </div>
         <div class="step-shot reveal">
-          <img src="screenshots/01-upload.jpg" alt="">
+          <img src="screenshots/01-upload.jpg" alt="CSV upload screen of the Bulk Downloader for Vimeo Chrome extension" loading="lazy" decoding="async" width="480" height="600">
         </div>
       </div>
 
@@ -691,7 +824,7 @@
           </p>
         </div>
         <div class="step-shot reveal">
-          <img src="screenshots/03-progress.jpg" alt="">
+          <img src="screenshots/03-progress.jpg" alt="Live download progress with per-file speed and total ETA across a Vimeo library batch" loading="lazy" decoding="async" width="480" height="600">
         </div>
       </div>
     </div>
@@ -707,19 +840,19 @@
 
     <div class="gallery-grid gallery-grid-4 reveal">
       <figure>
-        <img src="screenshots/01-upload.jpg" alt="Drop your Vimeo CSV">
+        <img src="screenshots/01-upload.jpg" alt="Step 1: drop in the Vimeo bulk-download CSV" loading="lazy" decoding="async" width="480" height="600">
         <figcaption>01 – Drop in the CSV</figcaption>
       </figure>
       <figure>
-        <img src="screenshots/02-preview.jpg" alt="Preview your videos">
+        <img src="screenshots/02-preview.jpg" alt="Step 2: preview every video in your Vimeo library and select what to download" loading="lazy" decoding="async" width="480" height="600">
         <figcaption>02 – Preview &amp; select</figcaption>
       </figure>
       <figure>
-        <img src="screenshots/03-progress.jpg" alt="Download progress">
+        <img src="screenshots/03-progress.jpg" alt="Step 3: live download progress with speed and ETA for each Vimeo original" loading="lazy" decoding="async" width="480" height="600">
         <figcaption>03 – Live progress</figcaption>
       </figure>
       <figure>
-        <img src="screenshots/04-done.jpg" alt="Download complete">
+        <img src="screenshots/04-done.jpg" alt="Done: every Vimeo original saved to your Chrome downloads folder" loading="lazy" decoding="async" width="480" height="600">
         <figcaption>04 – Done</figcaption>
       </figure>
     </div>
