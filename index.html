@@ -1,0 +1,890 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bulk Downloader for Vimeo – Original Quality</title>
+<meta name="description" content="The only Chrome extension that bulk-downloads your Vimeo library at original upload quality. Drop a CSV. Get every master file. No transcoded copies.">
+<meta name="theme-color" content="#0a0a0a">
+
+<!-- Search keywords baked into the body, but also a hint here -->
+<meta name="keywords" content="bulk download vimeo, vimeo bulk download, download all vimeo videos, vimeo original quality, vimeo download extension, vimeo csv download, download vimeo masters, vimeo backup tool">
+
+<!-- Open Graph / social -->
+<meta property="og:type" content="website">
+<meta property="og:title" content="Bulk Downloader for Vimeo – Original Quality">
+<meta property="og:description" content="Drop a CSV. Get every master file. The only Chrome extension that bulk-downloads your Vimeo library at original upload quality.">
+<meta property="og:image" content="og-image.jpg">
+<meta name="twitter:card" content="summary_large_image">
+
+<!-- Structured data for SEO -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Bulk Downloader for Vimeo",
+  "operatingSystem": "Chrome",
+  "applicationCategory": "BrowserApplication",
+  "description": "The only Chrome extension that bulk-downloads your Vimeo library at original upload quality. Drop a CSV. Get every master file. No transcoded copies.",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+}
+</script>
+
+<link rel="icon" type="image/png" href="icon.png">
+
+<style>
+  /* ─── Reset ────────────────────────────────────────────────────────────── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+
+  /* ─── Tokens ───────────────────────────────────────────────────────────── */
+  :root {
+    --bg:           #0a0a0a;
+    --bg-2:         #0f0f0f;
+    --surface:      #141414;
+    --surface-2:    #1c1c1c;
+    --border:       #1f1f1f;
+    --border-2:     #2a2a2a;
+    --accent:       #1AB7EA;
+    --accent-soft:  rgba(26,183,234,0.12);
+    --text:         #f5f5f5;
+    --text-2:       #cfcfcf;
+    --muted:        #8a8a8a;
+    --muted-2:      #5e5e5e;
+    --display: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", "Segoe UI", Roboto, system-ui, sans-serif;
+    --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    --pad-x: clamp(20px, 5vw, 56px);
+    --section-y: clamp(96px, 14vw, 180px);
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--display);
+    font-size: 17px;
+    line-height: 1.5;
+    overflow-x: hidden;
+  }
+
+  a { color: inherit; text-decoration: none; }
+  img { display: block; max-width: 100%; }
+
+  /* ─── Nav ──────────────────────────────────────────────────────────────── */
+  .nav {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: rgba(10,10,10,0.72);
+    backdrop-filter: saturate(160%) blur(18px);
+    -webkit-backdrop-filter: saturate(160%) blur(18px);
+    border-bottom: 1px solid transparent;
+    transition: border-color 200ms ease, background 200ms ease;
+  }
+  .nav.scrolled { border-bottom-color: var(--border); }
+  .nav-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 14px var(--pad-x);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 600;
+    font-size: 15px;
+    letter-spacing: -0.01em;
+  }
+  .brand img { width: 22px; height: 22px; }
+  .brand em { font-style: normal; color: var(--muted); font-weight: 500; }
+  .brand .v { color: var(--accent); }
+  .nav-cta {
+    margin-left: auto;
+    padding: 8px 18px;
+    border-radius: 999px;
+    background: var(--accent);
+    color: #fff;
+    font-weight: 600;
+    font-size: 14px;
+    transition: transform 150ms ease, box-shadow 200ms ease;
+  }
+  .nav-cta:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(26,183,234,0.35); }
+
+  /* ─── Generic section ─────────────────────────────────────────────────── */
+  section { padding: var(--section-y) var(--pad-x); }
+  .wrap { max-width: 1100px; margin: 0 auto; }
+  .wrap-narrow { max-width: 760px; margin: 0 auto; }
+
+  h1, h2, h3 {
+    font-weight: 700;
+    letter-spacing: -0.035em;
+    line-height: 1.04;
+  }
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    margin-bottom: 18px;
+  }
+
+  /* ─── Hero ─────────────────────────────────────────────────────────────── */
+  .hero {
+    position: relative;
+    padding-top: clamp(80px, 12vw, 140px);
+    padding-bottom: clamp(100px, 14vw, 200px);
+    overflow: hidden;
+  }
+  .hero-bg {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+      radial-gradient(900px 600px at 80% 0%, rgba(26,183,234,0.18) 0%, transparent 60%),
+      radial-gradient(700px 500px at 10% 90%, rgba(26,183,234,0.05) 0%, transparent 65%);
+  }
+  .hero-grid {
+    position: relative;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: clamp(40px, 6vw, 80px);
+    align-items: center;
+  }
+  @media (min-width: 900px) {
+    .hero-grid { grid-template-columns: 1.5fr 1fr; }
+  }
+  .hero h1 {
+    font-size: clamp(36px, 5.8vw, 76px);
+    letter-spacing: -0.04em;
+  }
+  .hero h1 .blue { color: var(--accent); }
+  .hero h1 .at-once { display: inline-block; }
+  .hero-sub {
+    margin-top: 22px;
+    font-size: clamp(18px, 2vw, 22px);
+    color: var(--text-2);
+    max-width: 38ch;
+    line-height: 1.45;
+    font-weight: 400;
+  }
+  .hero-cta {
+    margin-top: 36px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    align-items: center;
+  }
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 26px;
+    border-radius: 999px;
+    background: var(--accent);
+    color: #fff;
+    font-weight: 600;
+    font-size: 16px;
+    transition: transform 150ms ease, box-shadow 200ms ease, background 200ms ease;
+  }
+  .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 10px 30px rgba(26,183,234,0.4); background: #2cc4f3; }
+  .btn-ghost {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 14px 22px;
+    border-radius: 999px;
+    color: var(--text);
+    font-weight: 500;
+    font-size: 16px;
+    transition: color 150ms ease;
+  }
+  .btn-ghost:hover { color: var(--accent); }
+  .btn-ghost .arrow { transition: transform 150ms ease; }
+  .btn-ghost:hover .arrow { transform: translateX(3px); }
+
+  .hero-meta {
+    margin-top: 26px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 18px;
+    font-size: 13px;
+    color: var(--muted);
+    font-family: var(--mono);
+  }
+  .hero-meta span::before { content: '·'; margin-right: 18px; color: var(--muted-2); }
+  .hero-meta span:first-child::before { content: ''; margin-right: 0; }
+
+  /* Hero screenshot card */
+  .hero-shot {
+    position: relative;
+    justify-self: center;
+    width: 100%;
+    max-width: 440px;
+    aspect-ratio: 952 / 1200;
+    border-radius: 18px;
+    background: transparent;
+    transform-style: preserve-3d;
+    animation: hero-breathe 7.5s ease-in-out infinite;
+    will-change: transform;
+  }
+  .hero-shot:hover { animation-play-state: paused; }
+  .hero-shot::before {
+    content: '';
+    position: absolute;
+    inset: -18%;
+    background:
+      radial-gradient(closest-side,
+        rgba(26,183,234,0.55) 0%,
+        rgba(26,183,234,0.28) 38%,
+        rgba(26,183,234,0.08) 62%,
+        transparent 78%);
+    filter: blur(36px);
+    z-index: 0;
+    pointer-events: none;
+  }
+  .hero-shot img {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 18px;
+    box-shadow:
+      0 30px 80px rgba(0,0,0,0.55),
+      0 0 0 1px rgba(255,255,255,0.04);
+  }
+  @keyframes hero-breathe {
+    0%   { transform: perspective(1600px) rotateY(-5deg) rotateX(2deg) translateZ(0)    scale(1); }
+    50%  { transform: perspective(1600px) rotateY(-1deg) rotateX(0deg) translateZ(60px) scale(1.025); }
+    100% { transform: perspective(1600px) rotateY(-5deg) rotateX(2deg) translateZ(0)    scale(1); }
+  }
+
+  /* ─── Section: the truth ───────────────────────────────────────────────── */
+  .truth { background: var(--bg-2); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+  .truth h2 {
+    font-size: clamp(32px, 4.6vw, 56px);
+    letter-spacing: -0.035em;
+  }
+  .truth h2 .muted { color: var(--muted-2); }
+  .truth .lede {
+    margin-top: 32px;
+    font-size: clamp(18px, 1.7vw, 21px);
+    color: var(--text-2);
+    line-height: 1.55;
+  }
+  .truth .lede + .lede { margin-top: 18px; }
+  .truth strong { color: var(--text); font-weight: 600; }
+
+  /* ─── Section: how it works ────────────────────────────────────────────── */
+  .how h2 {
+    font-size: clamp(36px, 5vw, 64px);
+    text-align: center;
+    margin-bottom: 72px;
+  }
+  .steps { display: flex; flex-direction: column; gap: clamp(80px, 12vw, 140px); }
+  .step {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 40px;
+    align-items: center;
+  }
+  @media (min-width: 880px) {
+    .step { grid-template-columns: 1fr 1fr; gap: 80px; }
+    .step:nth-child(even) .step-text { order: 2; }
+  }
+  .step-num {
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--accent);
+    letter-spacing: 0.18em;
+    margin-bottom: 14px;
+    display: block;
+  }
+  .step h3 {
+    font-size: clamp(26px, 3vw, 38px);
+    margin-bottom: 18px;
+  }
+  .step p {
+    color: var(--text-2);
+    font-size: clamp(16px, 1.4vw, 18px);
+    line-height: 1.6;
+  }
+  .step p + p { margin-top: 14px; }
+  .step-shot {
+    width: 100%;
+    max-width: 380px;
+    aspect-ratio: 480 / 600;
+    border-radius: 16px;
+    overflow: hidden;
+    margin: 0 auto;
+    border: 1px solid var(--border-2);
+    background: var(--surface);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(26,183,234,0.06) inset;
+  }
+  .step-shot img { width: 100%; height: 100%; object-fit: cover; }
+
+  /* ─── Section: gallery ─────────────────────────────────────────────────── */
+  .gallery { background: var(--bg-2); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+  .gallery h2 {
+    font-size: clamp(32px, 4.6vw, 52px);
+    text-align: center;
+    margin-bottom: 16px;
+  }
+  .gallery-sub {
+    text-align: center;
+    color: var(--muted);
+    font-size: 17px;
+    margin-bottom: 64px;
+  }
+  .gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 20px;
+  }
+  .gallery-grid-4 { grid-template-columns: repeat(2, 1fr); }
+  @media (min-width: 880px) {
+    .gallery-grid-4 { grid-template-columns: repeat(4, 1fr); }
+  }
+  .gallery-grid figure {
+    background: var(--surface);
+    border: 1px solid var(--border-2);
+    border-radius: 14px;
+    overflow: hidden;
+    transition: transform 300ms ease, border-color 300ms ease;
+  }
+  .gallery-grid figure:hover { transform: translateY(-4px); border-color: rgba(26,183,234,0.4); }
+  .gallery-grid img {
+    width: 100%;
+    aspect-ratio: 480 / 600;
+    object-fit: cover;
+  }
+  .gallery-grid figcaption {
+    padding: 14px 18px 16px;
+    font-size: 13px;
+    color: var(--muted);
+    border-top: 1px solid var(--border);
+    font-family: var(--mono);
+    letter-spacing: 0.04em;
+  }
+
+  /* ─── Section: problem (SEO content) ──────────────────────────────────── */
+  .problem h2 {
+    font-size: clamp(30px, 4.4vw, 52px);
+    text-align: center;
+    max-width: 22ch;
+    margin: 0 auto 56px;
+    letter-spacing: -0.035em;
+    line-height: 1.1;
+  }
+  .problem-body p {
+    color: var(--text-2);
+    font-size: clamp(17px, 1.45vw, 19px);
+    line-height: 1.7;
+  }
+  .problem-body p + p { margin-top: 22px; }
+  .problem-body strong { color: var(--text); font-weight: 600; }
+  .mono-inline {
+    font-family: var(--mono);
+    color: var(--accent);
+    font-size: 0.92em;
+  }
+
+  /* ─── Section: features ────────────────────────────────────────────────── */
+  .features { background: var(--bg-2); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+  .features h2 {
+    font-size: clamp(32px, 4.6vw, 52px);
+    text-align: center;
+    margin-bottom: 16px;
+  }
+  .features-sub {
+    text-align: center;
+    color: var(--muted);
+    font-size: 17px;
+    margin-bottom: 64px;
+    max-width: 50ch;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .feat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    overflow: hidden;
+  }
+  .feat-grid-8 { grid-template-columns: repeat(2, 1fr); }
+  @media (min-width: 760px)  { .feat-grid-8 { grid-template-columns: repeat(2, 1fr); } }
+  @media (min-width: 1000px) { .feat-grid-8 { grid-template-columns: repeat(4, 1fr); } }
+  .feat {
+    background: var(--bg-2);
+    padding: 32px 28px;
+    transition: background 200ms ease;
+  }
+  .feat:hover { background: var(--surface); }
+  .feat-h {
+    font-size: 18px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    margin-bottom: 8px;
+  }
+  .feat-h::before {
+    content: '';
+    display: inline-block;
+    width: 6px; height: 6px;
+    background: var(--accent);
+    border-radius: 50%;
+    margin-right: 10px;
+    vertical-align: 3px;
+  }
+  .feat p {
+    color: var(--muted);
+    font-size: 15px;
+    line-height: 1.55;
+  }
+
+  /* ─── Section: install ─────────────────────────────────────────────────── */
+  .install {
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .install::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(700px 400px at 50% 0%, rgba(26,183,234,0.15) 0%, transparent 60%);
+    pointer-events: none;
+  }
+  .install h2 {
+    position: relative;
+    font-size: clamp(40px, 6vw, 80px);
+    letter-spacing: -0.045em;
+    margin-bottom: 20px;
+  }
+  .install p {
+    position: relative;
+    color: var(--text-2);
+    font-size: clamp(17px, 1.6vw, 20px);
+    margin-bottom: 38px;
+  }
+  .install-cta {
+    position: relative;
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    justify-content: center;
+  }
+  .btn-coffee {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 22px;
+    border-radius: 999px;
+    background: linear-gradient(135deg, #c08a4a 0%, #8a5a2a 100%);
+    color: #fff;
+    font-weight: 600;
+    font-size: 16px;
+    border: 1px solid #e0a868;
+    transition: transform 150ms ease, box-shadow 200ms ease;
+  }
+  .btn-coffee:hover { transform: translateY(-1px); box-shadow: 0 10px 28px rgba(224,168,104,0.35); }
+
+  /* ─── Section: FAQ ─────────────────────────────────────────────────────── */
+  .faq h2 {
+    font-size: clamp(32px, 4.6vw, 52px);
+    text-align: center;
+    margin-bottom: 64px;
+  }
+  details {
+    border-top: 1px solid var(--border);
+    padding: 22px 0;
+  }
+  details:last-of-type { border-bottom: 1px solid var(--border); }
+  summary {
+    cursor: pointer;
+    font-size: clamp(17px, 1.5vw, 20px);
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    transition: color 150ms ease;
+  }
+  summary::-webkit-details-marker { display: none; }
+  summary::after {
+    content: '+';
+    color: var(--accent);
+    font-size: 22px;
+    font-weight: 300;
+    line-height: 1;
+    transition: transform 200ms ease;
+  }
+  details[open] summary::after { content: '−'; }
+  details[open] summary { color: var(--accent); }
+  details p {
+    margin-top: 14px;
+    color: var(--text-2);
+    font-size: 16px;
+    line-height: 1.65;
+    max-width: 64ch;
+  }
+
+  /* ─── Footer ───────────────────────────────────────────────────────────── */
+  footer {
+    background: var(--bg-2);
+    border-top: 1px solid var(--border);
+    padding: 60px var(--pad-x) 40px;
+  }
+  .foot-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 24px;
+  }
+  .foot-links {
+    display: flex;
+    gap: 28px;
+    margin-left: auto;
+  }
+  .foot-links a {
+    color: var(--muted);
+    font-size: 14px;
+    transition: color 150ms ease;
+  }
+  .foot-links a:hover { color: var(--accent); }
+  .foot-meta {
+    width: 100%;
+    margin-top: 28px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--muted-2);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 18px;
+  }
+
+  /* ─── Reveal on scroll ─────────────────────────────────────────────────── */
+  .reveal {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 800ms cubic-bezier(.22,.61,.36,1), transform 800ms cubic-bezier(.22,.61,.36,1);
+  }
+  .reveal.is-visible { opacity: 1; transform: none; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .reveal { opacity: 1; transform: none; transition: none; }
+    .hero-shot { transform: none; animation: none; }
+    html { scroll-behavior: auto; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ── Nav ───────────────────────────────────────────────────────────────── -->
+<header class="nav" id="nav">
+  <div class="nav-inner">
+    <a href="#top" class="brand">
+      <img src="icon.png" alt="">
+      <span>Bulk Downloader <em>for <span class="v">Vimeo</span></em></span>
+    </a>
+    <a href="https://chromewebstore.google.com/detail/hnhehedakjafihioabaijicbidhabnme" target="_blank" rel="noopener" class="nav-cta">Add to Chrome</a>
+  </div>
+</header>
+
+<!-- ── Hero ──────────────────────────────────────────────────────────────── -->
+<section class="hero" id="top">
+  <div class="hero-bg"></div>
+  <div class="wrap hero-grid">
+    <div>
+      <div class="eyebrow reveal">Chrome Extension · Free</div>
+      <h1 class="reveal">
+        Download all your<br>
+        <span class="blue">Vimeo</span> videos<br>
+        <span class="at-once">at once.</span>
+      </h1>
+      <p class="hero-sub reveal">
+        The only Chrome extension that downloads your master files in bulk – not Vimeo's compressed copies. Drop in a CSV file. Get every original.
+      </p>
+      <div class="hero-cta reveal">
+        <a href="#install" class="btn-primary">Add to Chrome</a>
+        <a href="#how" class="btn-ghost">See how it works <span class="arrow">→</span></a>
+      </div>
+      <div class="hero-meta reveal">
+        <span>Drag and drop</span>
+        <span>Original quality</span>
+        <span>Free forever</span>
+      </div>
+    </div>
+    <div class="hero-shot reveal" aria-hidden="true">
+      <img src="screenshots/02-preview_fullsize.jpg" alt="Preview screen of the Bulk Downloader for Vimeo extension">
+    </div>
+  </div>
+</section>
+
+<!-- ── How it works ──────────────────────────────────────────────────────── -->
+<section class="how" id="how">
+  <div class="wrap">
+    <div class="eyebrow reveal" style="text-align:center">Three steps</div>
+    <h2 class="reveal">How it works</h2>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-text reveal">
+          <span class="step-num">01 / Request</span>
+          <h3>Ask Vimeo for the CSV.</h3>
+          <p>
+            Email Vimeo support and request a bulk-download CSV of your library. They'll send one back, usually in 1–3 days, with signed links to every original file you've uploaded.
+          </p>
+          <p style="color:var(--muted); font-size:14px; font-family:var(--mono); margin-top:20px">
+            vimeo.com/help/contact
+          </p>
+        </div>
+        <div class="step-shot reveal">
+          <img src="screenshots/05-stale.jpg" alt="">
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-text reveal">
+          <span class="step-num">02 / Load</span>
+          <h3>Drop it in.</h3>
+          <p>
+            Open the extension, drop in your CSV file, and your entire library is parsed instantly. Sort by size, resolution, or title to scan a thousand-video archive in seconds – or use the search bar to find a specific clip by name. Expired links are flagged before you start, and the total download size is calculated up front so you know exactly what you're committing to.
+          </p>
+          <p>
+            No accounts. No sign-in. Your CSV never leaves your browser.
+          </p>
+        </div>
+        <div class="step-shot reveal">
+          <img src="screenshots/01-upload.jpg" alt="">
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-text reveal">
+          <span class="step-num">03 / Download</span>
+          <h3>Click Start. Walk away.</h3>
+          <p>
+            Instead of opening every video on Vimeo's site one by one and clicking download – for hours, sometimes days – your entire selection runs as a single queue. Multiple files come down in parallel, with live per-file speed, a running total ETA, and a progress bar across the whole batch.
+          </p>
+          <p>
+            Close the popup whenever you want. The downloads keep running in the background, and a desktop notification lets you know the moment everything's finished.
+          </p>
+        </div>
+        <div class="step-shot reveal">
+          <img src="screenshots/03-progress.jpg" alt="">
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Gallery ───────────────────────────────────────────────────────────── -->
+<section class="gallery">
+  <div class="wrap">
+    <div class="eyebrow reveal" style="text-align:center">Inside the extension</div>
+    <h2 class="reveal">Built for libraries with hundreds of videos.</h2>
+    <p class="gallery-sub reveal">Dark theme. No clutter.</p>
+
+    <div class="gallery-grid gallery-grid-4 reveal">
+      <figure>
+        <img src="screenshots/01-upload.jpg" alt="Drop your Vimeo CSV">
+        <figcaption>01 – Drop in the CSV</figcaption>
+      </figure>
+      <figure>
+        <img src="screenshots/02-preview.jpg" alt="Preview your videos">
+        <figcaption>02 – Preview &amp; select</figcaption>
+      </figure>
+      <figure>
+        <img src="screenshots/03-progress.jpg" alt="Download progress">
+        <figcaption>03 – Live progress</figcaption>
+      </figure>
+      <figure>
+        <img src="screenshots/04-done.jpg" alt="Download complete">
+        <figcaption>04 – Done</figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<!-- ── The Vimeo problem (SEO + value-prop) ──────────────────────────────── -->
+<section class="problem">
+  <div class="wrap-narrow">
+    <div class="eyebrow reveal" style="text-align:center">The Vimeo problem</div>
+    <h2 class="reveal">How do I download all my Vimeo videos at once?</h2>
+
+    <div class="problem-body">
+      <p class="reveal">
+        It's the question every Vimeo Pro and Standard user eventually asks – usually when they're migrating off the platform, archiving years of work, or staring at a dashboard with hundreds of videos that need to come home. And the answer Vimeo gives you is the same one they've given for a decade: download them one at a time, by hand, from the website. For a library of fifty videos that's an afternoon. For a library of five hundred it's most of a month.
+      </p>
+      <p class="reveal">
+        A handful of tools claim to solve it. yt-dlp scripts. Third-party services like LOVE. Browser extensions that scrape the page. Each of them can sometimes pull a single original from Vimeo, but only when you're logged in and the uploader has explicitly toggled "Allow download" on that exact video. <strong>There is no public Vimeo endpoint anywhere that returns originals in bulk.</strong> Pull a hundred videos through any API and you get back what every API-based tool gets back: re-encoded streaming copies. Smaller. Compressed. Built for playback, not for archive.
+      </p>
+      <p class="reveal">
+        The original ProRes. The original <span class="mono-inline">.mov</span>. The master file that came out of your edit. For an entire library, those are reachable through exactly one path: a <strong>bulk-download CSV</strong> issued by Vimeo support. They'll send it on request, usually within 1–3 days, and inside it are signed download links to every original file you've uploaded. Not transcoded. Not re-encoded. The same file you sent them.
+      </p>
+      <p class="reveal">
+        This extension is the only tool built around that path. If you care about getting the actual file you uploaded – not a copy of it – this is the difference.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ── Features ──────────────────────────────────────────────────────────── -->
+<section class="features">
+  <div class="wrap">
+    <div class="eyebrow reveal" style="text-align:center">Built right</div>
+    <h2 class="reveal">Just the features that matter.</h2>
+    <p class="features-sub reveal">No upsells. No mystery. No silent quality drops.</p>
+
+    <div class="feat-grid feat-grid-8 reveal">
+      <div class="feat">
+        <div class="feat-h">Original upload quality</div>
+        <p>Not transcoded. Not re-encoded. The exact file you uploaded – byte for byte.</p>
+      </div>
+      <div class="feat">
+        <div class="feat-h">Live speed &amp; ETA</div>
+        <p>Total GB before you start. Per-file speed in real time. Never wonder how long it'll take.</p>
+      </div>
+      <div class="feat">
+        <div class="feat-h">Search, sort, select</div>
+        <p>Find a specific clip in a thousand-video library. Sort by size or resolution. Skip what you don't need.</p>
+      </div>
+      <div class="feat">
+        <div class="feat-h">Expired-link detection</div>
+        <p>Vimeo's signed URLs expire in about 7 days. The extension catches that on parse and tells you exactly what to do.</p>
+      </div>
+      <div class="feat">
+        <div class="feat-h">Runs in the background</div>
+        <p>Close the popup. Open another tab. Keep working. Desktop notification when it finishes.</p>
+      </div>
+      <div class="feat">
+        <div class="feat-h">No accounts. No sign-in.</div>
+        <p>Everything runs locally in your browser. Your CSV and your files never leave your machine.</p>
+      </div>
+      <div class="feat">
+        <div class="feat-h">Retry on failure</div>
+        <p>Network blip? Per-file retry. The queue keeps moving – and tells you exactly what failed and why.</p>
+      </div>
+      <div class="feat">
+        <div class="feat-h">No silent fallbacks</div>
+        <p>If an original is unavailable, the extension says so. It will never quietly hand you a transcoded copy.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Install ───────────────────────────────────────────────────────────── -->
+<section class="install" id="install">
+  <div class="wrap-narrow">
+    <h2 class="reveal">Free. Forever.</h2>
+    <p class="reveal">No subscriptions. No accounts. No ads.<br>If it saves your day, drop a coffee.</p>
+    <div class="install-cta reveal">
+      <a href="https://chromewebstore.google.com/detail/hnhehedakjafihioabaijicbidhabnme" target="_blank" rel="noopener" class="btn-primary" id="cws-link">Add to Chrome</a>
+      <a href="https://ko-fi.com/sircalen" target="_blank" rel="noopener" class="btn-coffee">
+        <span>☕</span><span>Buy me a Latte</span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ── FAQ ───────────────────────────────────────────────────────────────── -->
+<section class="faq">
+  <div class="wrap-narrow">
+    <div class="eyebrow reveal" style="text-align:center">Questions</div>
+    <h2 class="reveal">The honest part.</h2>
+
+    <div class="reveal">
+      <details>
+        <summary>Do I need a paid Vimeo plan?</summary>
+        <p>Yes. Vimeo support only issues bulk-download CSVs to paid accounts (Standard tier and above). Free accounts won't have the CSV option available to them.</p>
+      </details>
+      <details>
+        <summary>How long does the CSV take to arrive?</summary>
+        <p>Typically 1–3 business days from Vimeo support. Once it lands in your inbox, the signed links inside last about 7 days before they expire – so plan to download soon after you receive it.</p>
+      </details>
+      <details>
+        <summary>What if the links have already expired?</summary>
+        <p>The extension detects expired links the moment you drop the CSV in and walks you through requesting a fresh one. It will never try to download an expired URL – that path is closed before you can hit Start.</p>
+      </details>
+      <details>
+        <summary>How is this different from yt-dlp, LOVE, or the Vimeo API?</summary>
+        <p>Tools like yt-dlp can fetch a single original from Vimeo, but only when you're logged in and the uploader has explicitly enabled "Allow download" on that specific video. There's no public endpoint anywhere that returns originals in bulk. Batch tools like LOVE work in volume but are limited to Vimeo's transcoded streaming copies. The support-issued bulk-download CSV is the only path that gives you signed links to every original at once, and this extension is the only tool built around that path.</p>
+      </details>
+      <details>
+        <summary>Is this affiliated with Vimeo?</summary>
+        <p>No. This is a third-party tool that uses the official CSV that Vimeo support gives you. No API keys. No scraping. No workarounds.</p>
+      </details>
+      <details>
+        <summary>What about privacy?</summary>
+        <p>Nothing leaves your machine. The extension parses the CSV in your browser and hands each download to Chrome's downloads engine. No analytics. No tracking. No servers. The only outbound requests are the file downloads themselves, going from Chrome directly to Vimeo's CDN.</p>
+      </details>
+      <details>
+        <summary>Does it work on Mac, Windows, Linux?</summary>
+        <p>Anywhere Chrome runs. The extension is platform-agnostic – files save to your default Chrome downloads folder, wherever that is on your OS.</p>
+      </details>
+      <details>
+        <summary>Can it download someone else's Vimeo videos?</summary>
+        <p>No. The CSV only contains signed links to videos you own. This is a tool for getting your own files back – not for accessing other people's content.</p>
+      </details>
+    </div>
+  </div>
+</section>
+
+<!-- ── Footer ────────────────────────────────────────────────────────────── -->
+<footer>
+  <div class="foot-inner">
+    <a href="#top" class="brand">
+      <img src="icon.png" alt="">
+      <span>Bulk Downloader <em>for <span class="v">Vimeo</span></em></span>
+    </a>
+    <div class="foot-links">
+      <a href="#how">How it works</a>
+      <a href="#install">Install</a>
+      <a href="mailto:bulkdownloaderforvimeo@gmail.com">Support</a>
+      <a href="https://ko-fi.com/sircalen" target="_blank" rel="noopener">Ko-fi</a>
+    </div>
+    <div class="foot-meta">
+      <span>Not affiliated with Vimeo.</span>
+      <span>Built for filmmakers.</span>
+      <span>© <span id="year"></span></span>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // Year stamp
+  document.getElementById('year').textContent = new Date().getFullYear();
+
+  // Nav border on scroll
+  const nav = document.getElementById('nav');
+  const onScroll = () => nav.classList.toggle('scrolled', window.scrollY > 8);
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+
+  // Reveal-on-scroll
+  const io = new IntersectionObserver((entries) => {
+    for (const e of entries) {
+      if (e.isIntersecting) {
+        e.target.classList.add('is-visible');
+        io.unobserve(e.target);
+      }
+    }
+  }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+</script>
+
+</body>
+</html>
